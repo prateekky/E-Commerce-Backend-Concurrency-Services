@@ -394,7 +394,7 @@ Designed for horizontal worker scaling behind Gunicorn and Nginx.
 
 ---
 
-##Checkout: `http://13.60.232.161/docs`
+## Checkout: `http://13.60.232.161/docs`
 
 ## Author
 
