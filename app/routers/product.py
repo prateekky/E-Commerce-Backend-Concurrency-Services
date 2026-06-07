@@ -59,7 +59,8 @@ def create_product(
     new_product = Product(
         name=product_in.name,
         description=product_in.description,
-        price=product_in.price
+        price=product_in.price,
+        category_id=product_in.category_id
     )
     db.add(new_product)
     db.flush() # flushes to DB to get the new_product.id without fully committing

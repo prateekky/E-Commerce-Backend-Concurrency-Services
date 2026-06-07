@@ -32,6 +32,7 @@ class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
     price: float = Field(..., gt=0, description="Product price must be greater than zero")
+    category_id: Optional[int] = Field(None, description="ID of the category this product belongs to")
 
 class ProductCreate(ProductBase):
     initial_stock: int = Field(0, ge=0, description="Initial inventory amount")
@@ -74,3 +75,35 @@ class CreateReview(BaseModel):
     #validation
     rating: int = Field(..., ge=1, le=5, description="Rating must be between 1 and 5 stars")
     comment: Optional[str]=None
+
+#category schema
+class CategoryBase(BaseModel):
+    category_name: str=Field(..., max_length=50, min_length=3)
+    category_slug: str=Field(..., max_length=50, min_length=3)
+
+class CategoryCreate(CategoryBase):
+    ...
+
+class CategoryUpdate(CategoryBase):
+    ...
+
+class CategoryInDB(CategoryBase):
+    id:int
+    created_at:datetime
+
+    class Config:
+        from_attributes=True
+
+class ProductMini(BaseModel):
+    id:int
+    name:str
+    price: float
+
+    class Config:
+        from_attributes=True
+
+class CategoryResponse(CategoryInDB):
+    products: list[ProductMini]=[]
+
+    class Config:
+        from_attributes=True

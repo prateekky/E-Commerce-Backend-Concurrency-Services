@@ -7,6 +7,7 @@ from app.routers.auth import router as auth_router
 from app.routers.product import router as product_router
 from app.routers.checkout import router as checkout_router
 from app.routers.cart import router as cart_router
+from app.routers.category import router as category_router
 
 app = FastAPI(
     title="E-Commerce Backend & Concurrency Services",
@@ -30,6 +31,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(product_router, prefix="/api")
 app.include_router(checkout_router, prefix="/api")
 app.include_router(cart_router, prefix="/api")
+app.include_router(category_router, prefix="/api")
 
 @app.get("/", tags=["Root"])
 def root_status():
