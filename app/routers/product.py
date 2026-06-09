@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException,Response, status
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 from app.database import get_db
-from app.models import Product, Inventory, UserRole, Review, User
+from app.models import Product, Inventory, UserRole, Review, User, Category
 from app.auth import RoleChecker, get_current_user
-from app.schemas import CreateReview, ProductResponse, ProductCreate
+from app.schemas import CreateReview, ProductResponse, ProductCreate, ProductUpdate
 
 router = APIRouter(prefix="/products", tags=["Products & Inventory"])
 
@@ -32,6 +32,7 @@ def get_all_products(db: Session = Depends(get_db)):
             "name": p.name,
             "description": p.description,
             "price": p.price,
+            "category_id":p.category_id,
             "created_at":p.created_at,
             "stock": p.inventory.stock if p.inventory else 0,
             "reviews":[
@@ -54,6 +55,14 @@ def create_product(
     current_admin = Depends(RoleChecker([UserRole.ADMIN])) 
 ):
     """Creates a new product and automatically initializes its inventory."""
+    #category validation
+    category = db.get(Category, product_in.category_id)
+
+    if not category:
+        raise HTTPException(
+            status_code=404,
+            detail="Category not found"
+        )
     
     # 1.create the Product
     new_product = Product(
@@ -62,24 +71,28 @@ def create_product(
         price=product_in.price,
         category_id=product_in.category_id
     )
-    db.add(new_product)
-    db.flush() # flushes to DB to get the new_product.id without fully committing
+    try:
+        db.add(new_product)
+        db.flush() # flushes to DB to get the new_product.id without fully committing
 
-    # 2. create the linked Inventory record (1-to-1 relationship)
-    new_inventory = Inventory(
-        product_id=new_product.id,
-        stock=product_in.initial_stock
-    )
-    db.add(new_inventory)
-    
-    # 3.commit the transaction
-    db.commit()
-    db.refresh(new_product)
+        # 2. create the linked Inventory record (1-to-1 relationship)
+        new_inventory = Inventory(
+            product_id=new_product.id,
+            stock=product_in.initial_stock
+        )
+        db.add(new_inventory)
+        
+        # 3.commit the transaction
+        db.commit()
+        db.refresh(new_product)
 
-    return {
-        "message": "Product and Inventory created successfully", 
-        "product_id": new_product.id
-    }
+        return {
+            "message": "Product and Inventory created successfully", 
+            "product_id": new_product.id
+        }
+    except Exception:
+        db.rollback()
+        raise
 
 
 # 3. update inventory stock (admin only)
@@ -119,6 +132,42 @@ def update_inventory(
     except Exception:
         db.rollback()
         raise
+
+#update a product(admin)
+@router.put("/{product_id}", status_code=status.HTTP_200_OK)
+def update_product(
+    product_id: int,#product to update
+    product_up: ProductUpdate,#product fields to update
+    db: Session=Depends(get_db),#database session,
+    curr_admin: User=Depends(RoleChecker([UserRole.ADMIN]))#Role Based Access Control
+):
+    """Update the product info"""
+    #1. check if product exist
+    product_exist=db.get(Product,product_id)
+    if not product_exist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Product with id {product_id} not found"
+        )
+    #this will overwrite with None if any field is omitted
+    # product_exist.id=product_id
+    # product_exist.name=product_up.name
+    # product_exist.description=product_up.description
+    # product_exist.price=product_up.price
+    # product_exist.category_id=product_up.category_id
+    update_data = product_up.model_dump(exclude_unset=True)
+
+    for key, value in update_data.items():
+        setattr(product_exist, key, value)
+
+    db.commit()
+    db.refresh(product_exist)
+
+    return {
+        "message": "Product updated successfully",
+        "product": product_exist
+    }
+
 
 #Post reviews (public/customer)
 @router.post("/{product_id}/reviews", status_code=status.HTTP_201_CREATED)
@@ -167,9 +216,13 @@ def create_review(
         "review_id": new_review.id
     }
 
-#Delete Product
+#Delete Product(admin)
 @router.delete("/{p_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove(p_id, db: Session = Depends(get_db)):
+def remove(
+    p_id:int,
+    db: Session = Depends(get_db),
+    curr_admin: User=Depends(RoleChecker([UserRole.ADMIN]))
+    ):
     prod=db.get(Product,p_id)
     if not prod:
         raise HTTPException(
@@ -178,4 +231,4 @@ def remove(p_id, db: Session = Depends(get_db)):
         )
     db.delete(prod)
     db.commit()
-    return status.HTTP_204_NO_CONTENT
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

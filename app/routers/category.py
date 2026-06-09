@@ -52,6 +52,7 @@ async def create_category(
 ):
     """Admin endpoint to create a new category."""
     new_category=Category(
+        id=category_in.id,
         category_name=category_in.category_name,
         category_slug=category_in.category_slug
     )

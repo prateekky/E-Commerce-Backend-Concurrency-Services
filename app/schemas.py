@@ -32,20 +32,28 @@ class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
     price: float = Field(..., gt=0, description="Product price must be greater than zero")
-    category_id: Optional[int] = Field(None, description="ID of the category this product belongs to")
+    category_id: int = Field(..., description="ID of the category this product belongs to")
 
 class ProductCreate(ProductBase):
     initial_stock: int = Field(0, ge=0, description="Initial inventory amount")
 
+class ProductUpdate(BaseModel):
+    name: Optional[str]=None
+    description: Optional[str] = None
+    price: Optional[float] = Field(None, gt=0, description="Product price must be greater than zero")
+    category_id: Optional[int] = Field(None, description="ID of the category this product belongs to")
+
 class ReviewResponse(BaseModel):
     rating:int
-    comment: str | None=None
+    comment: Optional[str] | None=None
+    class Config:
+        from_attributes=True
 
 class ProductResponse(ProductBase):
     id: int
     created_at: datetime
     stock: int
-    reviews: List[ReviewResponse] = []
+    reviews: List[ReviewResponse] = Field(default_factory=list)
 
     class Config:
         from_attributes = True
