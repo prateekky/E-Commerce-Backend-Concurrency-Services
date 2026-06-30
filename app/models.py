@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Float,Numeric, ForeignKey, DateTime, Enum, text, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, Enum, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.database import Base
@@ -28,14 +28,18 @@ class User(Base):
 class Product(Base):
     __tablename__ = "products"
 
+    __table_args__= (
+        CheckConstraint("price>=0"),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
-    description = Column(String)
+    description = Column(String(500))
     price = Column(Numeric(10,2), nullable=False)
 
     category_id = Column(
         Integer,
-        ForeignKey("categories.id"),
+        ForeignKey("categories.id", ondelete="SET NULL"),
         nullable=True
     )
 
@@ -58,7 +62,7 @@ class Inventory(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    product = relationship("Product", back_populates="inventory")
+    product = relationship("Product", back_populates="inventory", lazy="selectin")
 
 #cart item schema with its connection with product using foreign key
 class CartItem(Base):
@@ -66,6 +70,7 @@ class CartItem(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "product_id"),
+        CheckConstraint("quantity>0"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -75,7 +80,7 @@ class CartItem(Base):
 
     # Relationships
     user = relationship("User", back_populates="cart_items")
-    product = relationship("Product", back_populates="cart_items")
+    product = relationship("Product", back_populates="cart_items", lazy="selectin")
 
 
 class OrderStatus(str, enum.Enum):
@@ -109,7 +114,7 @@ class OrderItem(Base):
 
     # Relationships
     order = relationship("Order", back_populates="items")
-    product = relationship("Product", back_populates="order_items")
+    product = relationship("Product", back_populates="order_items", lazy="selectin")
 
 #reviews table schema
 class Review(Base):
@@ -117,6 +122,7 @@ class Review(Base):
 
     __table_args__ = (
         UniqueConstraint("user_id", "product_id"),
+        CheckConstraint("rating >=1 AND rating<=5"),
     )
 
     id= Column(Integer, primary_key=True, index=True)
@@ -128,7 +134,7 @@ class Review(Base):
 
     #relationships back to parent tables!
     user = relationship("User", back_populates="reviews")
-    product = relationship("Product", back_populates="reviews")
+    product = relationship("Product", back_populates="reviews", lazy="selectin")
 
 class Category(Base):
     __tablename__="categories"
@@ -139,4 +145,18 @@ class Category(Base):
     created_at=Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     #relationship back to product
-    products=relationship("Product", back_populates="category")
+    products=relationship("Product", back_populates="category", lazy="selectin")
+
+#  User
+#  ├── Orders
+#  │      └── OrderItems
+#  │              └── Product
+#  │                     ├── Inventory
+#  │                     ├── Reviews
+#  │                     └── Category
+#  │
+#  ├── CartItems
+#  │      └── Product
+#  │
+#  └── Reviews
+#         └── Product

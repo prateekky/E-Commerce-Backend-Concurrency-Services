@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 
-from app.schemas import CategoryResponse, CategoryCreate, CategoryInDB
+from app.schemas import CategoryResponse, CategoryCreate, CategoryInDB, CategoryUpdate
 from app.models import Category, UserRole
 from app.database import get_db
 from app.auth import RoleChecker
@@ -52,7 +52,6 @@ async def create_category(
 ):
     """Admin endpoint to create a new category."""
     new_category=Category(
-        id=category_in.id,
         category_name=category_in.category_name,
         category_slug=category_in.category_slug
     )
@@ -68,4 +67,33 @@ async def create_category(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A category with this slug already exists."
+        )
+#4. update category(admin)
+@router.put("/{category_id}",response_model=CategoryInDB, status_code=status.HTTP_200_OK)
+async def update_category(
+    category_id: int,
+    category_up:CategoryUpdate,
+    db:Session=Depends(get_db),
+    current_admin=Depends(RoleChecker([UserRole.ADMIN]))
+):
+    """Admin endpoint to update the category."""
+    db_category=db.query(Category).filter(Category.id==category_id).first()
+    if not db_category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Category with {category_id} not found."
+        )
+    update_data=category_up.model_dump(exclude_unset=True)
+    for key,value in update_data.items():
+        setattr(db_category, key, value)
+
+    try:
+        db.commit()
+        db.refresh(db_category)
+        return db_category
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A category with this slug already exists"
         )
