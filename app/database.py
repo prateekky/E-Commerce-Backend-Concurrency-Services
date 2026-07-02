@@ -8,9 +8,12 @@ load_dotenv()
 
 # get PostgreSQL URL from environment variables
 SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://Inv:password@localhost:5432/ecommerce"
+    "DATABASE_URL",
+    # Removed fallback entirely
+    # "postgresql://Inv:password@localhost:5432/ecommerce"
 )
+if SQLALCHEMY_DATABASE_URL is None:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 
 # std synchronous engine for PostgreSQL (using psycopg2 driver)
 engine = create_engine(
