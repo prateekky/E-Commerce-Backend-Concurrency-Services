@@ -8,6 +8,18 @@ from app.models import Product, Inventory, UserRole, Review, User, Category
 from app.auth import RoleChecker, get_current_user
 from app.schemas import CreateReview, ProductResponse, ProductCreate, ProductUpdate
 
+from app.core.redis import (
+    redis_client,
+    CACHE_ALL_PRODUCTS,
+    CACHE_TIME
+)
+
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 router = APIRouter(prefix="/products", tags=["Products & Inventory"])
 
 # ==========================================
@@ -19,6 +31,18 @@ router = APIRouter(prefix="/products", tags=["Products & Inventory"])
 @router.get("/", response_model=List[ProductResponse])
 def get_all_products(db: Session = Depends(get_db)):
     """Fetch all products and their current inventory stock."""
+        
+    cache_key = CACHE_ALL_PRODUCTS
+    try:
+        cached_products = redis_client.get(cache_key)
+
+        if cached_products:
+            logger.info("Returning products from Redis")
+            return json.loads(cached_products)
+    except Exception as e:
+        logger.warning(f"Redis unavailable: {e}")
+
+
     products = db.query(Product).options(
         joinedload(Product.inventory),
         joinedload(Product.reviews)
@@ -43,7 +67,17 @@ def get_all_products(db: Session = Depends(get_db)):
                 for r in p.reviews
             ]
         })
-    return result
+    # Save the response in Redis for 5 minutes    
+    try:
+        redis_client.setex(
+            cache_key,
+            CACHE_TIME,
+            json.dumps(result, default=str)
+        )
+    except Exception as e:
+        logger.warning(f"Could not cache products: {e}")
+    return result    
+    
 
 
 # 2. create product (ADMIN ONLY - Role-Based Access Control)
@@ -84,6 +118,12 @@ def create_product(
         
         # 3.commit the transaction
         db.commit()
+
+        try:
+            redis_client.delete(CACHE_ALL_PRODUCTS)
+        except Exception:
+            pass
+
         db.refresh(new_product)
 
         return {
@@ -123,6 +163,12 @@ def update_inventory(
             )
         inventory.stock += added_stock
         db.commit()
+
+        try:
+            redis_client.delete(CACHE_ALL_PRODUCTS)
+        except Exception:
+            pass
+
         db.refresh(inventory)
         
         return {
@@ -161,6 +207,12 @@ def update_product(
         setattr(product_exist, key, value)
 
     db.commit()
+
+    try:
+        redis_client.delete(CACHE_ALL_PRODUCTS)
+    except Exception:
+        pass
+
     db.refresh(product_exist)
 
     return {
@@ -231,4 +283,10 @@ def remove(
         )
     db.delete(prod)
     db.commit()
+    
+    try:
+        redis_client.delete(CACHE_ALL_PRODUCTS)
+    except Exception:
+        pass
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
