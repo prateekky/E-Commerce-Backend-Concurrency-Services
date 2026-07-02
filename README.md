@@ -341,11 +341,18 @@ uvicorn app.main:app --reload
 Add screenshots here:
 
 - Swagger UI
-- PostgreSQL Tables
-- EC2 Deployment
-- Redis
-- API Responses
+   ![alt text](image.png)
 
+- PostgreSQL Tables
+   ![alt text](image-1.png)
+
+- EC2 Deployment
+   ![alt text](image-2.png)
+
+- API Responses
+   ![alt text](image-3.png)
+   
+   ![alt text](image-4.png)
 ---
 
 # 👨‍💻 Author
