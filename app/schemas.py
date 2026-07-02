@@ -92,8 +92,9 @@ class CategoryBase(BaseModel):
 class CategoryCreate(CategoryBase):
     ...
 
-class CategoryUpdate(CategoryBase):
-    ...
+class CategoryUpdate(BaseModel):
+    category_name: str | None = Field(None, max_length=50, min_length=3)
+    category_slug: str | None = Field(None, max_length=50, min_length=3)
 
 class CategoryInDB(CategoryBase):
     id:int
