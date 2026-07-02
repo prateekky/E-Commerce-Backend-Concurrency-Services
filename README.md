@@ -1,228 +1,196 @@
-# 🛒 E-Commerce Backend Engine — FastAPI + PostgreSQL
 
-A production-grade e-commerce backend designed to demonstrate real-world backend engineering principles including secure authentication, role-based authorization, transactional consistency, database concurrency control, and scalable deployment architecture.
+# 🛒 E-Commerce Backend Engine
+> **Production-grade E-Commerce Backend built with FastAPI, PostgreSQL, Redis and AWS EC2**
 
-Built using **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alembic**, this project simulates the core infrastructure powering modern online retail systems while emphasizing correctness under concurrent workloads.
+<p align="center">
 
----
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Production-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Redis](https://img.shields.io/badge/Redis-Enabled-red)
+![AWS](https://img.shields.io/badge/AWS-EC2-orange)
+![Nginx](https://img.shields.io/badge/Nginx-Reverse_Proxy-success)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-WSGI-darkgreen)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-## 🚀 Highlights
-
-### Secure Authentication & Authorization
-
-* JWT-based stateless authentication
-* Bcrypt password hashing
-* Role-Based Access Control (RBAC)
-* Protected Admin and Customer routes
-* Dependency-injected permission guards
-
-### Inventory & Order Management
-
-* Product catalog management
-* Inventory tracking
-* Shopping cart functionality
-* Order creation and history
-* Product reviews and ratings
-
-### ACID-Compliant Checkout Engine
-
-The checkout workflow is implemented as a single database transaction to guarantee:
-
-* Atomicity
-* Consistency
-* Isolation
-* Durability
-
-Failed operations automatically trigger transaction rollbacks, ensuring no partial orders or inventory corruption.
-
-### Concurrency-Safe Inventory Updates
-
-A pessimistic locking strategy is implemented using PostgreSQL row-level locks:
-
-```python
-.with_for_update()
-```
-
-This prevents overselling when multiple customers attempt to purchase the same product simultaneously.
-
-### Optimized Database Access
-
-* SQLAlchemy ORM
-* Eager loading using `joinedload`
-* Prevention of N+1 query issues
-* Efficient relational querying
-
-### Production Deployment Ready
-
-Designed for deployment behind:
-
-* Nginx
-* Gunicorn
-* Uvicorn Workers
-* PostgreSQL
+</p>
 
 ---
 
-# 🏗 System Architecture
+## 📖 Overview
+
+This project is a production-oriented backend for an e-commerce platform. Beyond CRUD operations, it demonstrates **authentication, authorization, ACID transactions, concurrency control, caching, database migrations, and Linux deployment**.
+
+---
+
+# ✨ Key Features
+
+- JWT Authentication
+- Role-Based Access Control (Admin / Customer)
+- Secure Password Hashing (Bcrypt)
+- Product & Category Management
+- Shopping Cart
+- Inventory Management
+- Order Processing
+- Product Reviews
+- Redis Integration
+- PostgreSQL Transactions
+- Row-Level Locking (`SELECT ... FOR UPDATE`)
+- Alembic Database Versioning
+- AWS EC2 Deployment
+- Nginx Reverse Proxy
+- Gunicorn + Uvicorn Workers
+- Systemd Service Management
+
+---
+
+# 🏗️ Production Architecture
 
 ```text
-                        ┌─────────────────┐
-                        │     Internet    │
-                        └────────┬────────┘
-                                 │
-                                 ▼
-                      ┌───────────────────┐
-                      │       Nginx       │
-                      │ Reverse Proxy     │
-                      │ SSL Termination   │
-                      └────────┬──────────┘
-                               │
-                               ▼
-                    ┌──────────────────────┐
-                    │  Gunicorn Master     │
-                    └────────┬─────────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         ▼                   ▼                   ▼
- ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
- │ Uvicorn W1   │   │ Uvicorn W2   │   │ Uvicorn W3   │
- └──────┬───────┘   └──────┬───────┘   └──────┬───────┘
-        │                  │                  │
-        └──────────────────┼──────────────────┘
-                           │
-                           ▼
-                 ┌───────────────────┐
-                 │      FastAPI      │
-                 └─────────┬─────────┘
-                           │
-                           ▼
-                 ┌───────────────────┐
-                 │    PostgreSQL     │
-                 └───────────────────┘
+                    Internet
+                        │
+                        ▼
+                  ┌───────────┐
+                  │   Nginx   │
+                  └─────┬─────┘
+                        │
+                        ▼
+               ┌────────────────┐
+               │ Gunicorn Master│
+               └──────┬─────────┘
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
+     Uvicorn      Uvicorn     Uvicorn
+      Worker        Worker       Worker
+          └──────────┬───────────┘
+                     ▼
+                  FastAPI
+              ┌──────┴──────┐
+              ▼             ▼
+          PostgreSQL      Redis
 ```
 
 ---
 
-# 🛠 Tech Stack
+# 🧰 Tech Stack
 
-| Layer            | Technology      |
-| ---------------- | --------------- |
-| Language         | Python 3.10+    |
-| API Framework    | FastAPI         |
-| ASGI Server      | Uvicorn         |
-| Process Manager  | Gunicorn        |
-| Database         | PostgreSQL      |
-| ORM              | SQLAlchemy      |
-| Migrations       | Alembic         |
-| Authentication   | JWT             |
-| Password Hashing | Bcrypt          |
-| Deployment       | AWS EC2 + Nginx |
-
----
-
-# 📊 Database Design
-
-The application follows a normalized relational database design.
-
-## Core Entities
-
-### Users
-
-Stores:
-
-* Credentials
-* Roles
-* Authentication information
-
-### Products
-
-Stores:
-
-* Product metadata
-* Pricing information
-
-### Inventories
-
-Maintains:
-
-* Available stock
-* Warehouse quantities
-
-### Cart Items
-
-Acts as a temporary user-product relationship before checkout.
-
-### Orders
-
-Represents completed purchases.
-
-### Order Items
-
-Captures immutable snapshots of purchased products.
-
-### Reviews
-
-Stores:
-
-* Ratings (1–5)
-* Customer feedback
+| Layer | Technology |
+|---|---|
+| Language | Python 3.12 |
+| Framework | FastAPI |
+| ORM | SQLAlchemy |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Migrations | Alembic |
+| Auth | JWT |
+| Hashing | Bcrypt |
+| Reverse Proxy | Nginx |
+| Process Manager | Gunicorn |
+| Service Manager | Systemd |
+| Cloud | AWS EC2 |
 
 ---
 
-# 🔐 Role-Based Access Control
-
-| Role     | Permissions                                                |
-| -------- | ---------------------------------------------------------- |
-| Admin    | Create products, update inventory                          |
-| Customer | Browse products, manage cart, place orders, submit reviews |
-
-Route protection is enforced through dependency injection and role validation middleware.
-
----
-
-# 🚦 Concurrency Control Strategy
-
-## The Problem
-
-Suppose inventory contains:
+# 📂 Folder Structure
 
 ```text
-Product A
-Stock = 1
+app/
+├── routers/
+├── models.py
+├── schemas.py
+├── auth.py
+├── dependencies.py
+├── database.py
+├── redis_client.py
+└── main.py
+
+alembic/
+└── versions/
+
+requirements.txt
+README.md
 ```
-
-Two customers attempt checkout simultaneously.
-
-Without locking:
-
-```text
-Request A reads stock = 1
-Request B reads stock = 1
-
-Request A purchases
-Request B purchases
-
-Final stock = -1
-```
-
-Result:
-
-❌ Overselling
-
-❌ Inventory corruption
 
 ---
 
-## The Solution
+# 🗄️ Database Design
 
-The checkout engine acquires a PostgreSQL row-level lock:
+```text
+Users
+ │
+ ├──────────────┐
+ ▼              ▼
+Orders       CartItems
+ │              │
+ ▼              │
+OrderItems      │
+ │              │
+ └──────► Products ◄──── Reviews
+             │
+             ▼
+         Categories
+
+Products
+   │
+   ▼
+Inventories
+```
+
+---
+
+# 🔐 Authentication Flow
+
+```text
+Register/Login
+      │
+      ▼
+Password Verified
+      │
+      ▼
+JWT Generated
+      │
+      ▼
+Client Stores Token
+      │
+      ▼
+Authorization Header
+      │
+      ▼
+Protected Endpoints
+```
+
+---
+
+# ⚡ Checkout Transaction
+
+```text
+Start Transaction
+        │
+Lock Inventory Row
+        │
+Check Stock
+        │
+Create Order
+        │
+Create Order Items
+        │
+Reduce Inventory
+        │
+Commit
+```
+
+If any step fails, the transaction rolls back.
+
+---
+
+# 🚦 Concurrency Control
+
+The checkout service prevents overselling with PostgreSQL row-level locking.
 
 ```python
 inventory = (
     db.query(Inventory)
-      .filter(
-          Inventory.product_id == item.product_id
-      )
+      .filter(Inventory.product_id == item.product_id)
       .with_for_update()
       .first()
 )
@@ -237,118 +205,28 @@ WHERE product_id = ?
 FOR UPDATE;
 ```
 
-Behavior:
+---
 
-```text
-Transaction A acquires lock
-Transaction B waits
+# ⚙️ Redis
 
-Transaction A commits
-Lock released
-
-Transaction B proceeds
-```
-
-Result:
-
-✅ No race conditions
-
-✅ No overselling
-
-✅ Strong consistency guarantees
+Redis is used as a high-speed in-memory data store for performance-oriented operations and is ready to support caching, rate limiting, session storage, or future background processing.
 
 ---
 
-# 📡 API Endpoints
+# 📡 API Modules
 
-## Authentication
+| Module | Description |
+|---|---|
+| Authentication | Register & Login |
+| Products | CRUD |
+| Categories | CRUD |
+| Inventory | Stock Updates |
+| Cart | User Shopping Cart |
+| Checkout | Transactional Purchase |
+| Orders | Order History |
+| Reviews | Ratings & Feedback |
 
-| Method | Endpoint             |
-| ------ | -------------------- |
-| POST   | `/api/auth/register` |
-| POST   | `/api/auth/login`    |
-
-## Products
-
-| Method | Endpoint                       | Access |
-| ------ | ------------------------------ | ------ |
-| GET    | `/api/products`                | Public |
-| POST   | `/api/products`                | Admin  |
-| PUT    | `/api/products/{id}/inventory` | Admin  |
-
-## Reviews
-
-| Method | Endpoint                     | Access   |
-| ------ | ---------------------------- | -------- |
-| POST   | `/api/products/{id}/reviews` | Customer |
-
-## Cart
-
-| Method | Endpoint    | Access   |
-| ------ | ----------- | -------- |
-| POST   | `/api/cart` | Customer |
-
-## Checkout
-
-| Method | Endpoint        | Access   |
-| ------ | --------------- | -------- |
-| POST   | `/api/checkout` | Customer |
-
----
-
-# ⚙️ Local Development Setup
-
-## Clone Repository
-
-```bash
-git clone https://github.com/yourusername/ecommerce-backend.git
-
-cd ecommerce-backend
-```
-
-## Create Virtual Environment
-
-```bash
-python -m venv venv
-
-source venv/bin/activate
-```
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-## Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-## Configure Environment Variables
-
-Create a `.env` file:
-
-```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/ecommerce
-
-SECRET_KEY=your-secret-key
-```
-
-## Apply Database Migrations
-
-```bash
-alembic upgrade head
-```
-
-## Run Server
-
-```bash
-uvicorn main:app --reload
-```
-
-API Documentation:
+Swagger:
 
 ```text
 http://localhost:8000/docs
@@ -356,50 +234,130 @@ http://localhost:8000/docs
 
 ---
 
-# 📈 Engineering Challenges Solved
+# ☁️ Deployment
 
-### Preventing Overselling
+Deployed on Ubuntu AWS EC2 using:
 
-Implemented pessimistic row-level locking with PostgreSQL.
+- FastAPI
+- Gunicorn
+- Uvicorn Workers
+- Nginx
+- PostgreSQL
+- Redis
+- Systemd
 
-### Maintaining Data Integrity
+Deployment flow:
 
-Wrapped checkout operations inside ACID-compliant transactions.
-
-### Eliminating N+1 Queries
-
-Utilized SQLAlchemy eager loading via `joinedload`.
-
-### Secure Access Control
-
-Implemented JWT authentication and RBAC authorization.
-
-### Scalable Deployment
-
-Designed for horizontal worker scaling behind Gunicorn and Nginx.
-
----
-
-# 🎯 What This Project Demonstrates
-
-* Backend API Design
-* Authentication & Authorization
-* Database Modeling
-* Transaction Management
-* Concurrency Control
-* Performance Optimization
-* Production Deployment Practices
-* PostgreSQL Internals
-* Software Architecture
+```text
+GitHub
+   │
+git pull
+   │
+pip install
+   │
+alembic upgrade head
+   │
+systemctl restart fastapi
+   │
+Nginx
+   │
+Users
+```
 
 ---
 
-## Checkout: `http://13.60.232.161/docs`
+# 🚀 Local Setup
 
-## Author
+```bash
+git clone https://github.com/Turbocyborg/E-Commerce-Backend-Concurrency-Services.git
+cd E-Commerce-Backend-Concurrency-Services
 
-**Prateek Kumar Yadav**
+python -m venv venv
+source venv/bin/activate
 
-Backend Engineer | Python | FastAPI | PostgreSQL
+pip install -r requirements.txt
+```
 
-Built to showcase production-grade backend engineering concepts and real-world scalability patterns.
+Create `.env`
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/ecommerce
+SECRET_KEY=your_secret
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+REDIS_URL=redis://localhost:6379/0
+```
+
+Run:
+
+```bash
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+---
+
+# 🔒 Security
+
+- JWT Authentication
+- Bcrypt Password Hashing
+- RBAC
+- SQLAlchemy ORM
+- Environment Variables
+- Protected Admin Routes
+
+---
+
+# 🧠 Engineering Concepts
+
+- REST API Design
+- Dependency Injection
+- ACID Transactions
+- Database Normalization
+- Row-Level Locking
+- Concurrency Control
+- ORM Optimization
+- Redis Integration
+- Production Deployment
+- Linux Administration
+
+---
+
+# 🛣️ Future Roadmap
+
+- Docker Compose
+- GitHub Actions CI/CD
+- Celery
+- Prometheus + Grafana
+- Kubernetes
+- AWS RDS
+- S3 Product Images
+- Elasticsearch
+
+---
+
+# 📸 Screenshots
+
+Add screenshots here:
+
+- Swagger UI
+- PostgreSQL Tables
+- EC2 Deployment
+- Redis
+- API Responses
+
+---
+
+# 👨‍💻 Author
+
+## Prateek Kumar Yadav
+
+Backend Engineer | Python | FastAPI | PostgreSQL | Redis | AWS
+
+**Live API**
+
+`http://13.60.232.161/docs`
+
+---
+
+⭐ If you found this project useful, consider giving it a star.
