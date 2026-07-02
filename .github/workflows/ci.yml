@@ -1,0 +1,19 @@
+#Name of the workflow
+name: CI Pipeline
+
+#start workflow on push event happens for branch main
+#else every branch would trigger the workflow
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    hello: #job name
+        #runs-on for type of runner github should provision for job
+        runs-on: ubuntu-latest #selecting suitable machine
+
+        #each jobs have work divided into steps(executed on the same runner)
+        steps:
+            - name: Print Message
+              run: echo "Hellow from GitHub Actions!"
