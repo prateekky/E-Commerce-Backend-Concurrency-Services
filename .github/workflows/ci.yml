@@ -15,5 +15,8 @@ jobs:
 
         #each jobs have work divided into steps(executed on the same runner)
         steps:
-            - name: Print Message
-              run: echo "Hellow from GitHub Actions!"
+          - name: Checkout Repository
+            uses: actions/checkout@v4
+
+          - name: Show Files
+            run: ls -la
