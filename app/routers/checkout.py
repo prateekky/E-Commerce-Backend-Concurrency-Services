@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
-from app.models import User, CartItem, Inventory, Product, Order, OrderItem, OrderStatus
+from app.models import User, CartItem, Inventory, Order, OrderItem, OrderStatus
 from app.auth import get_current_user
 
 router = APIRouter(prefix="/checkout", tags=["Checkout"])

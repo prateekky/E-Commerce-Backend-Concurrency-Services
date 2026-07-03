@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional, List
-from app.models import UserRole, OrderStatus
+from app.models import UserRole
 
 # user_auth Schemas
 class UserBase(BaseModel):

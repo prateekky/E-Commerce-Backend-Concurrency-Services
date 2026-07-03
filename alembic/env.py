@@ -6,7 +6,10 @@ from alembic import context
 
 # 1. IMPORT SECURE ENGINE MODELS AND DECLARATIVE BASE
 from app.database import Base, SQLALCHEMY_DATABASE_URL
-from app.models import User, Product, Inventory, CartItem, Order, OrderItem, Review, Category
+# from app.models import User, Product, Inventory, CartItem, Order, OrderItem, Review, Category
+# to register each model class or tables we could just import models instead of seperately importing each model
+from app import models # Register all SQLAlchemy models for Alembic autogenerate
+#now Base.metadata knows about each models since they are registered with Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -39,7 +42,6 @@ def run_migrations_online() -> None:
     # We can override the alembic.ini connection string dynamically 
     # to load from a secure local environment variable
     configuration = config.get_section(config.config_ini_section) or {}
-    import os
 
     configuration["sqlalchemy.url"] = SQLALCHEMY_DATABASE_URL
 

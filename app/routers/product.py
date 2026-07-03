@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException,Response, status
 from sqlalchemy.orm import Session, joinedload
-from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+# from pydantic import BaseModel, ConfigDict
+from typing import List
 
 from app.database import get_db
 from app.models import Product, Inventory, UserRole, Review, User, Category
