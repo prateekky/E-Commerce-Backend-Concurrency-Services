@@ -31,3 +31,7 @@ jobs:
           - name: Run Ruff
             run: |
               ruff check .
+
+          - name: Check Code Formatting
+            run: |
+              black --check .
