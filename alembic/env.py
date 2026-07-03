@@ -8,7 +8,8 @@ from alembic import context
 from app.database import Base, SQLALCHEMY_DATABASE_URL
 # from app.models import User, Product, Inventory, CartItem, Order, OrderItem, Review, Category
 # to register each model class or tables we could just import models instead of seperately importing each model
-from app import models # Register all SQLAlchemy models for Alembic autogenerate
+from app import models # noqa: F401
+# Register all SQLAlchemy models for Alembic autogenerate
 #now Base.metadata knows about each models since they are registered with Base.metadata
 
 # this is the Alembic Config object, which provides
