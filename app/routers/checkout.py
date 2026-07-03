@@ -17,12 +17,14 @@ def checkout_cart(
     """
     # 1. Fetch all items in user's active shopping cart with eager loading
     cart_items = (
-    db.query(CartItem)
-    .options(joinedload(CartItem.product))
-    .filter(CartItem.user_id == current_user.id)
-    .order_by(CartItem.product_id) # Enforces sequential locking order to make deadlock impossible
-    .all()
-)
+        db.query(CartItem)
+        .options(joinedload(CartItem.product))
+        .filter(CartItem.user_id == current_user.id)
+        .order_by(
+            CartItem.product_id
+        )  # Enforces sequential locking order to make deadlock impossible
+        .all()
+    )
     if not cart_items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Your cart is empty."

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 # from fastapi.middleware.cors import CORSMiddleware
 # from app.database import engine, Base
 
@@ -12,10 +13,10 @@ from app.routers.category import router as category_router
 app = FastAPI(
     title="E-Commerce Backend & Concurrency Services",
     description="Engineered using FastAPI, PostgreSQL, SQLAlchemy, and row-level pessimistic locking.",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-#Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 # CORS for web integrations (replace * with secure origins in production)
 # app.add_middleware(
@@ -33,11 +34,12 @@ app.include_router(checkout_router, prefix="/api")
 app.include_router(cart_router, prefix="/api")
 app.include_router(category_router, prefix="/api")
 
+
 @app.get("/", tags=["Root"])
 def root_status():
     return {
         "service": "E-Commerce Backend API Engine",
         "engine": "FastAPI with ASGI Uvicorn",
         "database": "PostgreSQL via SQLAlchemy Transactions",
-        "health": "healthy"
+        "health": "healthy",
     }

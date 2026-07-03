@@ -6,11 +6,13 @@ from alembic import context
 
 # 1. IMPORT SECURE ENGINE MODELS AND DECLARATIVE BASE
 from app.database import Base, SQLALCHEMY_DATABASE_URL
+
 # from app.models import User, Product, Inventory, CartItem, Order, OrderItem, Review, Category
 # to register each model class or tables we could just import models instead of seperately importing each model
-from app import models # noqa: F401
+from app import models  # noqa: F401
+
 # Register all SQLAlchemy models for Alembic autogenerate
-#now Base.metadata knows about each models since they are registered with Base.metadata
+# now Base.metadata knows about each models since they are registered with Base.metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,6 +27,7 @@ if config.config_file_name is not None:
 # set this to Base.metadata instead of None!
 target_metadata = Base.metadata
 
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
@@ -38,9 +41,10 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # We can override the alembic.ini connection string dynamically 
+    # We can override the alembic.ini connection string dynamically
     # to load from a secure local environment variable
     configuration = config.get_section(config.config_ini_section) or {}
 
@@ -53,13 +57,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

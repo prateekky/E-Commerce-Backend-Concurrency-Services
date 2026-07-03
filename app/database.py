@@ -17,10 +17,10 @@ if SQLALCHEMY_DATABASE_URL is None:
 
 # std synchronous engine for PostgreSQL (using psycopg2 driver)
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    pool_size=20,          # appropriate connection pools for high load
-    max_overflow=10,       # allow burst connections when pool is full
-    pool_pre_ping=True     # test connections before executing queries to prevent stale sockets
+    SQLALCHEMY_DATABASE_URL,
+    pool_size=20,  # appropriate connection pools for high load
+    max_overflow=10,  # allow burst connections when pool is full
+    pool_pre_ping=True,  # test connections before executing queries to prevent stale sockets
 )
 
 # local Session constructor
@@ -29,13 +29,15 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # declarative base class for all SQLAlchemy database models
 Base = declarative_base()
 
+
 # initialize our session and perform all our actions
 def get_db():
     db = SessionLocal()
     try:
-        yield db#creates db, pauses, and hand it over to route
+        yield db  # creates db, pauses, and hand it over to route
     finally:
-        db.close() # cleanup guaranteed:ensures connection is returned to the pool even during errors
+        db.close()  # cleanup guaranteed:ensures connection is returned to the pool even during errors
+
 
 # def create_table():
 #     Base.metadata.create_all(bind=engine)
