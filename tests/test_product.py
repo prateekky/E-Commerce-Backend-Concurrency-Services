@@ -7,20 +7,17 @@ def test_get_products_empty(client):
     assert response.status_code == 200
     assert response.json() == []
 
-
-# create product
-def test_create_product(client, admin_headers, sample_categories, db):
-    payload = {
-        "name": "MacBook Pro",
-        "description": "Apple Laptop",
-        "price": 199999,
-        "category_id": sample_categories[0].id,
-        "initial_stock": 10,
-    }
+#create product
+def test_create_product(
+    client,
+    admin_headers,
+    sample_product_categories,
+    db
+):
 
     response = client.post(
         "/api/products/",
-        json=payload,
+        json=sample_product_categories,
         headers=admin_headers,
     )
 
@@ -28,30 +25,25 @@ def test_create_product(client, admin_headers, sample_categories, db):
 
     product_id = response.json()["product_id"]
 
-    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
+    inventory = (
+        db.query(Inventory)
+        .filter(Inventory.product_id == product_id)
+        .first()
+    )
 
     assert inventory is not None
     assert inventory.stock == 10
 
-
-# customer forbidden
+#customer forbidden
 def test_customer_forbidden(
     client,
     customer_headers,
-    sample_categories,
+    sample_product_categories,
 ):
-
-    payload = {
-        "name": "MacBook Pro",
-        "description": "Apple Laptop",
-        "price": 199999,
-        "category_id": sample_categories[0].id,
-        "initial_stock": 10,
-    }
 
     response = client.post(
         "/api/products/",
-        json=payload,
+        json=sample_product_categories,
         headers=customer_headers,
     )
 
@@ -61,32 +53,3 @@ def test_customer_forbidden(
         response.json()["detail"]
         == "You do not have permission to access this resource"
     )
-
-
-# test inventory
-def test_inventory_created(
-    client,
-    admin_headers,
-    sample_categories,
-    db,
-):
-    payload = {
-        "name": "MacBook Pro",
-        "description": "Apple Laptop",
-        "price": 199999,
-        "category_id": sample_categories[0].id,
-        "initial_stock": 10,
-    }
-
-    response = client.post(
-        "/api/products/",
-        json=payload,
-        headers=admin_headers,
-    )
-
-    assert response.status_code == 201
-
-    inventory = db.query(Inventory).first()
-
-    assert inventory is not None
-    assert inventory.stock == 10
