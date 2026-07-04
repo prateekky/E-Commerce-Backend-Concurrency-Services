@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from app.models import User, CartItem, Inventory, Order, OrderItem, OrderStatus
 from app.auth import get_current_user
+from decimal import Decimal
 
 router = APIRouter(prefix="/checkout", tags=["Checkout"])
 
@@ -31,7 +32,7 @@ def checkout_cart(
         )
 
     order_items_to_create = []
-    total_amount = 0.0
+    total_amount = Decimal("0.00")
 
     try:
         # 2. Iterate and verify inventory with pessimistic lock
