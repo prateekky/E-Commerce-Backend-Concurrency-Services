@@ -70,27 +70,15 @@ def test_successful_checkout(
 
     assert data["message"] == "Checkout custom transaction completed successfully."
 
-    inventory = (
-        db.query(Inventory)
-        .filter(Inventory.product_id == product_id)
-        .first()
-    )
+    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
 
     assert inventory.stock == 8
 
-    cart_items = (
-        db.query(CartItem)
-        .filter(CartItem.user_id == customer_user.id)
-        .all()
-    )
+    cart_items = db.query(CartItem).filter(CartItem.user_id == customer_user.id).all()
 
     assert len(cart_items) == 0
 
-    order = (
-        db.query(Order)
-        .filter(Order.user_id == customer_user.id)
-        .first()
-    )
+    order = db.query(Order).filter(Order.user_id == customer_user.id).first()
 
     assert order is not None
     assert order.status == OrderStatus.COMPLETED
@@ -109,11 +97,7 @@ def test_insufficient_inventory(
         sample_categories,
     )
 
-    inventory = (
-        db.query(Inventory)
-        .filter(Inventory.product_id == product_id)
-        .first()
-    )
+    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
 
     inventory.stock = 1
     db.commit()
@@ -136,11 +120,7 @@ def test_insufficient_inventory(
 
     assert response.status_code == 400
 
-    inventory = (
-        db.query(Inventory)
-        .filter(Inventory.product_id == product_id)
-        .first()
-    )
+    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
 
     assert inventory.stock == 1
 

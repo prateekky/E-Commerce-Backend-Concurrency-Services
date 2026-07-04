@@ -7,13 +7,9 @@ def test_get_products_empty(client):
     assert response.status_code == 200
     assert response.json() == []
 
-#create product
-def test_create_product(
-    client,
-    admin_headers,
-    sample_categories,
-    db
-):
+
+# create product
+def test_create_product(client, admin_headers, sample_categories, db):
     payload = {
         "name": "MacBook Pro",
         "description": "Apple Laptop",
@@ -32,16 +28,13 @@ def test_create_product(
 
     product_id = response.json()["product_id"]
 
-    inventory = (
-        db.query(Inventory)
-        .filter(Inventory.product_id == product_id)
-        .first()
-    )
+    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
 
     assert inventory is not None
     assert inventory.stock == 10
 
-#customer forbidden
+
+# customer forbidden
 def test_customer_forbidden(
     client,
     customer_headers,
@@ -69,7 +62,8 @@ def test_customer_forbidden(
         == "You do not have permission to access this resource"
     )
 
-#test inventory
+
+# test inventory
 def test_inventory_created(
     client,
     admin_headers,

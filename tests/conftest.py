@@ -20,6 +20,7 @@ TestSessionLocal = sessionmaker(
     bind=test_engine,
 )
 
+
 @pytest.fixture(autouse=True)
 def setup_database():
     Base.metadata.drop_all(bind=test_engine)
@@ -27,19 +28,23 @@ def setup_database():
 
     yield
 
+
 def override_get_db():
-    db=TestSessionLocal()
+    db = TestSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-app.dependency_overrides[get_db]=override_get_db
+
+app.dependency_overrides[get_db] = override_get_db
+
 
 @pytest.fixture
 def client():
     with TestClient(app, raise_server_exceptions=True) as client:
         yield client
+
 
 @pytest.fixture
 def db():
@@ -49,8 +54,9 @@ def db():
     finally:
         session.close()
 
-#prepare data for testing category
-@pytest.fixture #fixture prepares and test verifies
+
+# prepare data for testing category
+@pytest.fixture  # fixture prepares and test verifies
 def sample_categories(db):
     categories = [
         Category(
@@ -64,13 +70,14 @@ def sample_categories(db):
         Category(
             category_name="Fashion",
             category_slug="fashion",
-        )
+        ),
     ]
 
     db.add_all(categories)
     db.commit()
 
     return categories
+
 
 @pytest.fixture
 def sample_product_payload(sample_categories):
@@ -82,7 +89,8 @@ def sample_product_payload(sample_categories):
         "initial_stock": 10,
     }
 
-#sample product
+
+# sample product
 @pytest.fixture
 def sample_product(db, sample_categories):
     product = Product(
@@ -107,7 +115,8 @@ def sample_product(db, sample_categories):
 
     return product
 
-#Rolechecker and authorization
+
+# Rolechecker and authorization
 @pytest.fixture
 def admin_user(db):
     admin = User(
@@ -122,6 +131,7 @@ def admin_user(db):
 
     return admin
 
+
 @pytest.fixture
 def admin_token(admin_user):
     token = create_access_token(
@@ -132,14 +142,14 @@ def admin_token(admin_user):
 
     return token
 
-#User
+
+# User
 @pytest.fixture
 def admin_headers(admin_token):
-    return {
-        "Authorization": f"Bearer {admin_token}"
-    }
+    return {"Authorization": f"Bearer {admin_token}"}
 
-#create customer
+
+# create customer
 @pytest.fixture
 def customer_user(db):
     user = User(
@@ -157,12 +167,9 @@ def customer_user(db):
 
 @pytest.fixture
 def customer_headers(customer_token):
-    return {
-        "Authorization": f"Bearer {customer_token}"
-    }
+    return {"Authorization": f"Bearer {customer_token}"}
+
 
 @pytest.fixture
 def customer_token(customer_user):
-    return create_access_token(
-        {"sub": customer_user.email}
-    )
+    return create_access_token({"sub": customer_user.email})

@@ -9,6 +9,7 @@ def test_get_all_categories(client, sample_categories):
 
     assert data[0]["category_name"] == "Electronics"
 
+
 def test_get_category_by_slug(client, sample_categories):
     response = client.get("/api/categories/electronics")
 
@@ -19,12 +20,14 @@ def test_get_category_by_slug(client, sample_categories):
     assert data["category_name"] == "Electronics"
     assert data["category_slug"] == "electronics"
 
+
 def test_get_invalid_category(client):
     response = client.get("/api/categories/invalid")
 
     assert response.status_code == 404
 
     assert response.json()["detail"] == "Category not found"
+
 
 def test_create_product_invalid_category(
     client,

@@ -1,9 +1,6 @@
 def test_create_category(client, admin_headers):
 
-    payload = {
-        "category_name": "Sports",
-        "category_slug": "sports"
-    }
+    payload = {"category_name": "Sports", "category_slug": "sports"}
 
     response = client.post(
         "/api/categories/",
@@ -18,13 +15,11 @@ def test_create_category(client, admin_headers):
     assert data["category_name"] == "Sports"
     assert data["category_slug"] == "sports"
 
-#duplicacy testing
+
+# duplicacy testing
 def test_duplicate_category_slug(client, admin_headers):
 
-    payload = {
-        "category_name": "Sports",
-        "category_slug": "sports"
-    }
+    payload = {"category_name": "Sports", "category_slug": "sports"}
 
     client.post(
         "/api/categories/",
@@ -40,10 +35,10 @@ def test_duplicate_category_slug(client, admin_headers):
 
     assert response.status_code == 400
 
-    assert response.json()["detail"] == \
-        "A category with this slug already exists."
-    
-#check if customer can post an sports or not
+    assert response.json()["detail"] == "A category with this slug already exists."
+
+
+# check if customer can post an sports or not
 def test_customer_cannot_create_category(
     client,
     customer_headers,
@@ -60,26 +55,24 @@ def test_customer_cannot_create_category(
 
     assert response.status_code == 403
 
+
 def test_invalid_category(
     client,
     admin_headers,
 ):
     payload = {
-    "name": "MacBook",
-    "description": "Laptop",
-    "price": 2000,
-    "category_id": 999,
-    "initial_stock": 10,
-}
+        "name": "MacBook",
+        "description": "Laptop",
+        "price": 2000,
+        "category_id": 999,
+        "initial_stock": 10,
+    }
     response = client.post(
         "/api/products/",
         json=payload,
         headers=admin_headers,
     )
 
-    assert response.status_code ==404
+    assert response.status_code == 404
 
-    assert(
-        response.json()["detail"]
-        =="Category not found"
-    )
+    assert response.json()["detail"] == "Category not found"
