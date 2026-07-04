@@ -15,6 +15,9 @@ jobs:
         #runs-on for type of runner github should provision for job
         runs-on: ubuntu-latest #selecting suitable machine
 
+        env:
+          DATABASE_URL: sqlite:///./test.db
+
         #each jobs have work divided into steps(executed on the same runner)
         steps:
           - name: Checkout Repository
