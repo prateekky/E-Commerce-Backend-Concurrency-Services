@@ -59,3 +59,27 @@ def test_customer_cannot_create_category(
     )
 
     assert response.status_code == 403
+
+def test_invalid_category(
+    client,
+    admin_headers,
+):
+    payload = {
+    "name": "MacBook",
+    "description": "Laptop",
+    "price": 2000,
+    "category_id": 999,
+    "initial_stock": 10,
+}
+    response = client.post(
+        "/api/products/",
+        json=payload,
+        headers=admin_headers,
+    )
+
+    assert response.status_code ==404
+
+    assert(
+        response.json()["detail"]
+        =="Category not found"
+    )

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.database import Base, get_db
-from app.models import Category, User, UserRole
+from app.models import Category, User, UserRole, Product, Inventory
 from app.auth import get_password_hash, create_access_token
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -38,7 +38,7 @@ app.dependency_overrides[get_db]=override_get_db
 
 @pytest.fixture
 def client():
-    with TestClient(app) as client:
+    with TestClient(app, raise_server_exceptions=True) as client:
         yield client
 
 @pytest.fixture
@@ -72,6 +72,41 @@ def sample_categories(db):
 
     return categories
 
+@pytest.fixture
+def sample_product_payload(sample_categories):
+    return {
+        "name": "MacBook Pro",
+        "description": "Apple Laptop",
+        "price": 199999,
+        "category_id": sample_categories[0].id,
+        "initial_stock": 10,
+    }
+
+#sample product
+@pytest.fixture
+def sample_product(db, sample_categories):
+    product = Product(
+        product_name="MacBook Pro",
+        description="Apple Laptop",
+        price=199999,
+        category_id=sample_categories[0].id,
+    )
+
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+
+    inventory = Inventory(
+        product_id=product.id,
+        quantity=10,
+    )
+
+    db.add(inventory)
+    db.commit()
+    db.refresh(inventory)
+
+    return product
+
 #Rolechecker and authorization
 @pytest.fixture
 def admin_user(db):
@@ -97,6 +132,7 @@ def admin_token(admin_user):
 
     return token
 
+#User
 @pytest.fixture
 def admin_headers(admin_token):
     return {
@@ -118,14 +154,15 @@ def customer_user(db):
 
     return user
 
-@pytest.fixture
-def customer_token(customer_user):
-    return create_access_token(
-        {"sub": customer_user.email}
-    )
 
 @pytest.fixture
 def customer_headers(customer_token):
     return {
         "Authorization": f"Bearer {customer_token}"
     }
+
+@pytest.fixture
+def customer_token(customer_user):
+    return create_access_token(
+        {"sub": customer_user.email}
+    )
