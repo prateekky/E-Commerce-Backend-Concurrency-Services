@@ -9,11 +9,11 @@ def test_get_products_empty(client):
 
 
 # create product
-def test_create_product(client, admin_headers, sample_product_categories, db):
+def test_create_product(client, admin_headers, sample_product_payload, db):
 
     response = client.post(
         "/api/products/",
-        json=sample_product_categories,
+        json=sample_product_payload,
         headers=admin_headers,
     )
 
@@ -31,12 +31,12 @@ def test_create_product(client, admin_headers, sample_product_categories, db):
 def test_customer_forbidden(
     client,
     customer_headers,
-    sample_product_categories,
+    sample_product_payload,
 ):
 
     response = client.post(
         "/api/products/",
-        json=sample_product_categories,
+        json=sample_product_payload,
         headers=customer_headers,
     )
 
