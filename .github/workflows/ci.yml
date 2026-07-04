@@ -35,3 +35,7 @@ jobs:
           - name: Check Code Formatting
             run: |
               black --check .
+
+          - name: Run Tests
+            run: |
+              python -m pytest
