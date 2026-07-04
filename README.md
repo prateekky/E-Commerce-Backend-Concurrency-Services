@@ -1,8 +1,9 @@
+# 🛒 E-Commerce Backend & Concurrency Services
 
-# 🛒 E-Commerce Backend Engine
-> **Production-grade E-Commerce Backend built with FastAPI, PostgreSQL, Redis and AWS EC2**
+> **Production-grade E-Commerce Backend built with FastAPI, PostgreSQL, Redis, and AWS EC2.**
 
-<p align="center">
+<p *align*="center">
+
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Production-green)
@@ -17,30 +18,35 @@
 
 ---
 
-## 📖 Overview
+# 📖 Overview
 
-This project is a production-oriented backend for an e-commerce platform. Beyond CRUD operations, it demonstrates **authentication, authorization, ACID transactions, concurrency control, caching, database migrations, and Linux deployment**.
+A production-oriented backend for an e-commerce platform built using **FastAPI**.
+
+The project goes beyond basic CRUD operations and demonstrates backend engineering concepts including authentication, role-based authorization, transactional integrity, concurrency control, Redis caching, automated testing, CI/CD, and cloud deployment.
 
 ---
 
-# ✨ Key Features
+# ✨ Features
 
-- JWT Authentication
-- Role-Based Access Control (Admin / Customer)
-- Secure Password Hashing (Bcrypt)
-- Product & Category Management
-- Shopping Cart
-- Inventory Management
-- Order Processing
-- Product Reviews
-- Redis Integration
-- PostgreSQL Transactions
-- Row-Level Locking (`SELECT ... FOR UPDATE`)
-- Alembic Database Versioning
-- AWS EC2 Deployment
-- Nginx Reverse Proxy
-- Gunicorn + Uvicorn Workers
-- Systemd Service Management
+* JWT Authentication
+* Role-Based Access Control (Admin / Customer)
+* Secure Password Hashing (bcrypt)
+* Product Management
+* Category Management
+* Inventory Management
+* Shopping Cart
+* Checkout System
+* Product Reviews
+* PostgreSQL Transactions
+* Row-Level Locking (`SELECT ... FOR UPDATE`)
+* Redis Caching
+* Alembic Database Migrations
+* Automated Testing with Pytest
+* GitHub Actions CI/CD
+* AWS EC2 Deployment
+* Gunicorn + Uvicorn Workers
+* Nginx Reverse Proxy
+* Systemd Service Management
 
 ---
 
@@ -50,62 +56,69 @@ This project is a production-oriented backend for an e-commerce platform. Beyond
                     Internet
                         │
                         ▼
-                  ┌───────────┐
-                  │   Nginx   │
-                  └─────┬─────┘
-                        │
-                        ▼
-               ┌────────────────┐
-               │ Gunicorn Master│
-               └──────┬─────────┘
-          ┌───────────┼───────────┐
-          ▼           ▼           ▼
-     Uvicorn      Uvicorn     Uvicorn
-      Worker        Worker       Worker
-          └──────────┬───────────┘
+              ┌────────────────┐
+              │     Nginx      │
+              │ Reverse Proxy  │
+              └───────┬────────┘
+                      │
+                      ▼
+             ┌──────────────────┐
+             │ Gunicorn Master  │
+             └───────┬──────────┘
+             ┌───────┴──────────┐
+             ▼                  ▼
+      Uvicorn Worker      Uvicorn Worker
+             └───────┬──────────┘
                      ▼
                   FastAPI
               ┌──────┴──────┐
               ▼             ▼
-          PostgreSQL      Redis
+         PostgreSQL       Redis
 ```
 
 ---
 
 # 🧰 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Language | Python 3.12 |
-| Framework | FastAPI |
-| ORM | SQLAlchemy |
-| Database | PostgreSQL |
-| Cache | Redis |
-| Migrations | Alembic |
-| Auth | JWT |
-| Hashing | Bcrypt |
-| Reverse Proxy | Nginx |
-| Process Manager | Gunicorn |
-| Service Manager | Systemd |
-| Cloud | AWS EC2 |
+| Layer               | Technology         |
+| ------------------- | ------------------ |
+| Language            | Python 3.12        |
+| Framework           | FastAPI            |
+| ORM                 | SQLAlchemy         |
+| Database            | PostgreSQL         |
+| Cache               | Redis              |
+| Authentication      | JWT                |
+| Password Hashing    | bcrypt             |
+| Database Migrations | Alembic            |
+| Testing             | Pytest             |
+| CI/CD               | GitHub Actions     |
+| Reverse Proxy       | Nginx              |
+| Application Server  | Gunicorn + Uvicorn |
+| Service Manager     | Systemd            |
+| Cloud               | AWS EC2            |
 
 ---
 
-# 📂 Folder Structure
+# 📂 Project Structure
 
 ```text
 app/
+├── core/
+│   └── redis.py
 ├── routers/
+│   ├── auth.py
+│   ├── product.py
+│   ├── category.py
+│   ├── cart.py
+│   └── checkout.py
+├── auth.py
+├── database.py
 ├── models.py
 ├── schemas.py
-├── auth.py
-├── dependencies.py
-├── database.py
-├── redis_client.py
 └── main.py
 
 alembic/
-└── versions/
+tests/
 
 requirements.txt
 README.md
@@ -129,11 +142,9 @@ OrderItems      │
              │
              ▼
          Categories
-
-Products
-   │
-   ▼
-Inventories
+             │
+             ▼
+        Inventories
 ```
 
 ---
@@ -144,10 +155,10 @@ Inventories
 Register/Login
       │
       ▼
-Password Verified
+Password Verification
       │
       ▼
-JWT Generated
+JWT Generation
       │
       ▼
 Client Stores Token
@@ -156,36 +167,47 @@ Client Stores Token
 Authorization Header
       │
       ▼
-Protected Endpoints
+Protected API Endpoints
 ```
 
 ---
 
-# ⚡ Checkout Transaction
+# ⚡ Transactional Checkout
+
+The checkout system guarantees ACID compliance.
 
 ```text
 Start Transaction
         │
+        ▼
 Lock Inventory Row
         │
-Check Stock
+        ▼
+Validate Stock
         │
+        ▼
 Create Order
         │
+        ▼
 Create Order Items
         │
+        ▼
 Reduce Inventory
         │
-Commit
+        ▼
+Clear Shopping Cart
+        │
+        ▼
+Commit Transaction
 ```
 
-If any step fails, the transaction rolls back.
+If any step fails, the transaction is rolled back automatically.
 
 ---
 
 # 🚦 Concurrency Control
 
-The checkout service prevents overselling with PostgreSQL row-level locking.
+Overselling is prevented using PostgreSQL row-level locking.
 
 ```python
 inventory = (
@@ -205,28 +227,41 @@ WHERE product_id = ?
 FOR UPDATE;
 ```
 
+This guarantees that concurrent purchases cannot modify the same inventory row simultaneously.
+
 ---
 
-# ⚙️ Redis
+# ⚡ Redis Integration
 
-Redis is used as a high-speed in-memory data store for performance-oriented operations and is ready to support caching, rate limiting, session storage, or future background processing.
+Redis is used as a high-speed in-memory cache to reduce database load and improve API response time.
+
+Current implementation:
+
+* Product list caching
+* Automatic cache invalidation after product updates
+
+The architecture is ready to support:
+
+* Rate limiting
+* Session storage
+* Background jobs
+* Queue processing
 
 ---
 
 # 📡 API Modules
 
-| Module | Description |
-|---|---|
-| Authentication | Register & Login |
-| Products | CRUD |
-| Categories | CRUD |
-| Inventory | Stock Updates |
-| Cart | User Shopping Cart |
-| Checkout | Transactional Purchase |
-| Orders | Order History |
-| Reviews | Ratings & Feedback |
+| Module         | Description            |
+| -------------- | ---------------------- |
+| Authentication | Register & Login       |
+| Products       | CRUD Operations        |
+| Categories     | CRUD Operations        |
+| Inventory      | Stock Management       |
+| Cart           | Shopping Cart          |
+| Checkout       | Transaction Processing |
+| Reviews        | Product Reviews        |
 
-Swagger:
+Interactive API documentation:
 
 ```text
 http://localhost:8000/docs
@@ -234,33 +269,120 @@ http://localhost:8000/docs
 
 ---
 
-# ☁️ Deployment
+# 🧪 Automated Testing
 
-Deployed on Ubuntu AWS EC2 using:
+The project includes automated tests using **Pytest**.
 
-- FastAPI
-- Gunicorn
-- Uvicorn Workers
-- Nginx
-- PostgreSQL
-- Redis
-- Systemd
+Current test coverage includes:
 
-Deployment flow:
+* Authentication
+* JWT Authorization
+* RBAC
+* Categories
+* Products
+* Inventory
+* Shopping Cart
+* Checkout Transactions
+* Order Creation
+
+Run locally:
+
+```bash
+pytest -v
+```
+
+---
+
+# 🔄 CI/CD Pipeline
+
+Every push to the **main** branch automatically triggers GitHub Actions.
+
+Pipeline:
 
 ```text
-GitHub
-   │
+Developer
+      │
+      ▼
+git push
+      │
+      ▼
+GitHub Actions
+      │
+      ▼
+Checkout Repository
+      │
+      ▼
+Install Dependencies
+      │
+      ▼
+Ruff Linting
+      │
+      ▼
+Black Formatting Check
+      │
+      ▼
+Pytest
+      │
+      ▼
+SSH into AWS EC2
+      │
+      ▼
+Pull Latest Code
+      │
+      ▼
+Install Dependencies
+      │
+      ▼
+Alembic Migration
+      │
+      ▼
+Restart Redis
+      │
+      ▼
+Restart FastAPI
+      │
+      ▼
+Deployment Complete
+```
+
+---
+
+# ☁️ Production Deployment
+
+Deployed on **Ubuntu AWS EC2** using:
+
+* FastAPI
+* Gunicorn
+* Uvicorn Workers
+* Nginx
+* PostgreSQL
+* Redis
+* Systemd
+* GitHub Actions
+
+Deployment architecture:
+
+```text
+Developer
+    │
+git push
+    │
+GitHub Actions
+    │
+SSH
+    │
+AWS EC2
+    │
 git pull
-   │
+    │
 pip install
-   │
+    │
 alembic upgrade head
-   │
-systemctl restart fastapi
-   │
+    │
+Restart Services
+    │
 Nginx
-   │
+    │
 Users
 ```
 
@@ -268,30 +390,45 @@ Users
 
 # 🚀 Local Setup
 
+Clone the repository:
+
 ```bash
 git clone https://github.com/Turbocyborg/E-Commerce-Backend-Concurrency-Services.git
+
 cd E-Commerce-Backend-Concurrency-Services
+```
 
+Create a virtual environment:
+
+```bash
 python -m venv venv
-source venv/bin/activate
 
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Create `.env`
+Create a `.env` file:
 
 ```env
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/ecommerce
-SECRET_KEY=your_secret
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+SECRET_KEY=your_secret_key
 REDIS_URL=redis://localhost:6379/0
 ```
 
-Run:
+Run migrations:
 
 ```bash
 alembic upgrade head
+```
+
+Start the server:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
@@ -299,75 +436,107 @@ uvicorn app.main:app --reload
 
 # 🔒 Security
 
-- JWT Authentication
-- Bcrypt Password Hashing
-- RBAC
-- SQLAlchemy ORM
-- Environment Variables
-- Protected Admin Routes
+* JWT Authentication
+* Password Hashing (bcrypt)
+* Role-Based Access Control
+* Environment Variables
+* SQLAlchemy ORM
+* Protected Admin Routes
+* Transaction Rollback Protection
 
 ---
 
-# 🧠 Engineering Concepts
+# 🧠 Engineering Concepts Demonstrated
 
-- REST API Design
-- Dependency Injection
-- ACID Transactions
-- Database Normalization
-- Row-Level Locking
-- Concurrency Control
-- ORM Optimization
-- Redis Integration
-- Production Deployment
-- Linux Administration
+* REST API Design
+* Dependency Injection
+* ACID Transactions
+* Concurrency Control
+* Row-Level Locking
+* Database Normalization
+* SQLAlchemy ORM
+* Redis Caching
+* Automated Testing
+* Continuous Integration
+* Continuous Deployment
+* Linux Service Management
+* Cloud Deployment
 
 ---
 
-# 🛣️ Future Roadmap
+# 📚 What I Learned
 
-- Docker Compose
-- GitHub Actions CI/CD
-- Celery
-- Prometheus + Grafana
-- Kubernetes
-- AWS RDS
-- S3 Product Images
-- Elasticsearch
+Through this project I gained practical experience with:
+
+* Designing scalable REST APIs using FastAPI
+* Implementing JWT authentication and RBAC
+* Managing SQLAlchemy relationships
+* Building transactional database operations
+* Preventing race conditions using PostgreSQL row-level locking
+* Integrating Redis for caching
+* Writing automated tests with Pytest
+* Building CI/CD pipelines using GitHub Actions
+* Deploying production applications on AWS EC2
+* Managing Gunicorn, Nginx, Redis, and Systemd services
+
+---
+
+# 🛣️ Future Improvements
+
+* Docker
+* Docker Compose
+* Kubernetes
+* AWS RDS
+* AWS S3 Product Images
+* Celery Background Tasks
+* Prometheus Monitoring
+* Grafana Dashboards
+* Elasticsearch
 
 ---
 
 # 📸 Screenshots
 
-Add screenshots here:
+## Add screenshots here:
 
 - Swagger UI
-  
+
    ![alt text](image.png)
 
+
 - PostgreSQL Tables
-  
+
    ![alt text](image-1.png)
 
+
 - EC2 Deployment
-  
+
    ![alt text](image-2.png)
 
+
 - API Responses
-  
+
    ![alt text](image-3.png)
-   
+
    ![alt text](image-4.png)
 
 ---
+
+# 🌐 Live API
+
+Swagger UI
+
+```text
+http://13.60.232.161/docs
+```
+
+---
+
 # 👨‍💻 Author
 
 ## Prateek Kumar Yadav
 
 Backend Engineer | Python | FastAPI | PostgreSQL | Redis | AWS
-
-**Live API**
-
-`http://13.60.232.161/docs`
 
 ---
 
