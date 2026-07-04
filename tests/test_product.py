@@ -7,13 +7,9 @@ def test_get_products_empty(client):
     assert response.status_code == 200
     assert response.json() == []
 
-#create product
-def test_create_product(
-    client,
-    admin_headers,
-    sample_product_categories,
-    db
-):
+
+# create product
+def test_create_product(client, admin_headers, sample_product_categories, db):
 
     response = client.post(
         "/api/products/",
@@ -25,16 +21,13 @@ def test_create_product(
 
     product_id = response.json()["product_id"]
 
-    inventory = (
-        db.query(Inventory)
-        .filter(Inventory.product_id == product_id)
-        .first()
-    )
+    inventory = db.query(Inventory).filter(Inventory.product_id == product_id).first()
 
     assert inventory is not None
     assert inventory.stock == 10
 
-#customer forbidden
+
+# customer forbidden
 def test_customer_forbidden(
     client,
     customer_headers,
