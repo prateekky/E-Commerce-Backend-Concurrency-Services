@@ -17,6 +17,7 @@ jobs:
 
         env:
           DATABASE_URL: sqlite:///./test.db
+          SECRET_KEY: github-actions-test-secret
 
         #each jobs have work divided into steps(executed on the same runner)
         steps:
